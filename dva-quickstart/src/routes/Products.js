@@ -10,20 +10,29 @@ const Products = ({ dispatch, products }) => {
       payload: id
     })
   }
-  const handleAdd = () => {
+  // 异步调用添加
+  const handlePromiseAdd = () => {
     dispatch({
       type: 'products/addProductAfterSecond',
       payload: {
-        name: 'zpp',
+        name: 'zjr'+ Math.floor(Math.random() * 2000),
         id: Math.random() * 100
       }
     })
   }
+  // 同步调用添加
+  const handleAdd = () => {
+    dispatch({
+      type: 'products/add',
+      payload: {
+        name: 'zjr'+ Math.floor(Math.random() * 2000),
+        id: Math.random() * 100
+      }
+    })
+  }
+
   return (
-    <>
-      <h2>List of Products</h2>
-      <ProductList onDelete={handleDelete} products={products} onAdd={handleAdd}></ProductList>
-    </>
+    <ProductList onDelete={handleDelete} products={products} onAdd={handleAdd} onPromiseAdd={handlePromiseAdd}></ProductList>
   )
 }
 

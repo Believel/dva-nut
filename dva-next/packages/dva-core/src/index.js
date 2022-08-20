@@ -49,13 +49,15 @@ export function create(hooksAndOpts = {}, createOpts = {}) {
   /**
    * Register model before app is started.
    *
-   * @param m {Object} model to register
+   * @param m {Object} model to register   注册的model文件
    */
   function model(m) {
     if (process.env.NODE_ENV !== 'production') {
       checkModel(m, app._models);
     }
+    // 处理 model对象每个 effects 和 reducer中的key键，加上spacename前缀
     const prefixedModel = prefixNamespace({ ...m });
+    // 将 prefixedModel 对象存放在 _models数组中
     app._models.push(prefixedModel);
     return prefixedModel;
   }
@@ -169,13 +171,18 @@ export function create(hooksAndOpts = {}, createOpts = {}) {
       }
     };
 
+    // create saga middleware
     const sagaMiddleware = createSagaMiddleware();
     const promiseMiddleware = createPromiseMiddleware(app);
     app._getSaga = getSaga.bind(null);
 
     const sagas = [];
     const reducers = { ...initialReducer };
+    // 循环遍历每个注册的model
     for (const m of app._models) {
+      // m 表示当前的model对象值
+
+      // 将每个model下的reducer和state对象，整理成redux中reducer格式
       reducers[m.namespace] = getReducer(m.reducers, m.state, plugin._handleActions);
       if (m.effects) {
         sagas.push(app._getSaga(m.effects, m, onError, plugin.get('onEffect'), hooksAndOpts));
@@ -223,7 +230,13 @@ export function create(hooksAndOpts = {}, createOpts = {}) {
     // Run subscriptions
     const unlisteners = {};
     for (const model of this._models) {
+      // 当前model对象中的事件监听对象
       if (model.subscriptions) {
+        // runSubscription 函数返回
+        // {
+        //   funcs,  Array 每个监听函数的返回值是函数的存放值的集合
+        //   nonFuncs    Array 每个监听函数的返回值不是函数，存放的函数键值key的集合
+        // }
         unlisteners[model.namespace] = runSubscription(model.subscriptions, model, app, onError);
       }
     }

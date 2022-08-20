@@ -24,19 +24,24 @@ export default function(opts = {}) {
   const history = opts.history || createHashHistory();
   const createOpts = {
     initialReducer: {
+      // add router reducer into root reducer by passing history to connectRouter
       router: connectRouter(history),
     },
     setupMiddlewares(middlewares) {
+      // for dispatching history actions
       return [routerMiddleware(history), ...middlewares];
     },
     setupApp(app) {
       app._history = patchHistory(history);
     },
   };
-
+  // Create dva-core instance.
   const app = create(opts, createOpts);
+  // 保存定义的start: Start the app.
   const oldAppStart = app.start;
   app.router = router;
+  // 重新定义一个start
+  // !这样做的目的：因为start方法里面有用到this,不用call指定调用者为app的话，oldAppStart()会找错对象
   app.start = start;
   return app;
 
@@ -50,6 +55,7 @@ export default function(opts = {}) {
 
   function start(container) {
     // 允许 container 是字符串，然后用 querySelector 找元素
+    // '#root'
     if (isString(container)) {
       container = document.querySelector(container);
       invariant(container, `[app.start] container ${container} not found`);
@@ -75,6 +81,7 @@ export default function(opts = {}) {
 
     // If has container, render; else, return react component
     if (container) {
+      // render react component
       render(container, store, app, app._router);
       app._plugin.apply('onHmr')(render.bind(null, container, store, app));
     } else {
@@ -90,16 +97,24 @@ function isHTMLElement(node) {
 function isString(str) {
   return typeof str === 'string';
 }
-
+// 获取Provider
 function getProvider(store, app, router) {
+  // 这里用的react-redux中提供的 Provider 组件，接收一个store对象
   const DvaRoot = extraProps => (
     <Provider store={store}>{router({ app, history: app._history, ...extraProps })}</Provider>
   );
   return DvaRoot;
 }
-
+/**
+ * 渲染视图
+ * @param {*} container 根元素
+ * @param {*} store 创建的store对象
+ * @param {*} app 创建的app实例对象
+ * @param {*} router 注册的视图
+ */
 function render(container, store, app, router) {
   const ReactDOM = require('react-dom'); // eslint-disable-line
+  // getProvider
   ReactDOM.render(React.createElement(getProvider(store, app, router)), container);
 }
 

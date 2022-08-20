@@ -1,15 +1,35 @@
 import dva from 'dva';
+import { createBrowserHistory as createHistory } from 'history'
 import 'antd/dist/antd.css'
 import './index.css';
 
+
 // 1. Initialize  创建应用
-const app = dva();
+const app = dva({
+  history: createHistory()
+});
 
 // 2. Plugins
 // app.use({});
 
 // 3. Model  在这里载入model
-app.model(require('./models/products').default);
+const model = app.model(require('./models/products').default);
+
+// 处理 effects 和 reducers之后的model对象
+// console.log('model', model)
+// {
+//   "namespace": "products",
+//   "effects": {
+//     {
+//       "products/addProductAfterSecond": f
+//     }
+//   },
+//   "reducers": {
+//     "products/add": f,
+//     "products/delete": f
+//   }
+// }
+
 
 // 4. Router 注册视图
 app.router(require('./router').default);
