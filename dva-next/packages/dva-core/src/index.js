@@ -32,7 +32,7 @@ const dvaModel = {
  */
 export function create(hooksAndOpts = {}, createOpts = {}) {
   const { initialReducer, setupApp = noop } = createOpts;
-
+  // 注册插件
   const plugin = new Plugin();
   plugin.use(filterHooks(hooksAndOpts));
 
